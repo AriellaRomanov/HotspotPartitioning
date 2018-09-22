@@ -1,6 +1,6 @@
 template <typename T>
-UndirectedUnlabeledGraph<T>::UndirectedUnlabeledGraph(const long size)
-: UndirectedGraph<T>(size)
+UndirectedUnlabeledGraph<T>::UndirectedUnlabeledGraph(const long size, const std::string& read_delim)
+: UndirectedGraph<T>(size), read_delimeter(read_delim)
 {
 }
 
