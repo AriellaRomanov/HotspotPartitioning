@@ -18,7 +18,7 @@ void ReadConfig(const std::string& file_path, Parameters& params);
 std::string GetParameter(const std::string& key, const Parameters& params, const std::string& def_val);
 double GetParameter(const std::string& key, const Parameters& params, const double def_val);
 
-std::vector<std::string> split(std::string value, const std::string delimiter);
+//std::vector<std::string> split(std::string value, const std::string delimiter);
 
 int main(int argc, char *argv[])
 {
@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     return 1;
   }
   file.close();
+
   auto graph_size = graph.GetSize();
 
   std::vector<Partition> structures;
@@ -154,7 +155,7 @@ int main(int argc, char *argv[])
         for (const auto id : partitions.at(i))
           os << "    " << id << std::endl;
       }
-      os << "Claimed " << claimed_nodes.size() << " of " << graph.GetSize() << std::endl;
+      os << "Claimed " << claimed_nodes.size() << " of " << graph.GetSize() - 1 << std::endl;
       os.close();
     }
   }
@@ -167,7 +168,7 @@ int main(int argc, char *argv[])
       for (const auto id : partitions.at(i))
         std::cout << "    " << id << std::endl;
     }
-    std::cout << "Claimed " << claimed_nodes.size() << " of " << graph.GetSize() << std::endl;
+    std::cout << "Claimed " << claimed_nodes.size() << " of " << graph.GetSize() - 1 << std::endl;
   }
 
   return 0;
@@ -183,11 +184,18 @@ void ReadStructures(const std::string& structure_file, std::vector<Partition>& s
     {
       auto ids = split(line, " ");
       Partition s;
-      for (auto id : ids)
-        s.insert(std::atoi(id.c_str()));
+      for (long i = 1; i < static_cast<long>(ids.size()); i++)
+        s.insert(std::atoi(ids.at(i).c_str()));
 
       if (s.size() > 0)
-        structures.push_back(s);
+      {
+        bool match = false;
+        for (long i = 0; i < static_cast<long>(structures.size()) && !match; i++)
+          match = (structures.at(i) == s);
+
+        if (!match)
+          structures.push_back(s);
+      }
     }
     file.close();
   }
@@ -198,7 +206,7 @@ void SelectHotSpots(std::vector<Partition>& structures, Partition& hotspots, con
   SortPartitions(structures);
 
   // from each of the largest structures
-  for (long i = 0; i < count && i < static_cast<long>(structures.size()); i++)
+  for (long i = 0; hotspots.size() < count && i < static_cast<long>(structures.size()); i++)
   {
     // select the node with highest degree
     long max_node_id = -1;
@@ -213,9 +221,13 @@ void SelectHotSpots(std::vector<Partition>& structures, Partition& hotspots, con
       }
     }
 
-    // and make it a hotspot
+    // and make it a hotspot if it isn't already one
     if (max_node_id != -1)
-      hotspots.insert(max_node_id);
+    {
+      auto itr = hotspots.find(max_node_id);
+      if (itr == hotspots.end())
+        hotspots.insert(max_node_id);
+    }
   }
 }
 
