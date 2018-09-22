@@ -8,8 +8,9 @@ std::vector<std::string> split(std::string value, const std::string delimiter);
 template <typename T>
 class UndirectedUnlabeledGraph : public UndirectedGraph<T>
 {
+  std::string read_delimeter;
   public:
-    UndirectedUnlabeledGraph(const long size = 1);
+    UndirectedUnlabeledGraph(const long size = 1, const std::string& read_delim = ",");
     UndirectedUnlabeledGraph(const UndirectedUnlabeledGraph<T>& copy);
     UndirectedUnlabeledGraph(UndirectedUnlabeledGraph<T>&& source);
     virtual ~UndirectedUnlabeledGraph();
@@ -28,7 +29,7 @@ class UndirectedUnlabeledGraph : public UndirectedGraph<T>
       std::string line;
       while (std::getline(is, line))
       {
-        auto ids = split(line, ",");
+        auto ids = split(line, graph.read_delimeter);
         auto a = atoi(ids.at(0).c_str());
         auto b = atoi(ids.at(1).c_str());
         auto w = atoi(ids.at(2).c_str());
