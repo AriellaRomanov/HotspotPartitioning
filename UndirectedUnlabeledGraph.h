@@ -1,5 +1,9 @@
 #pragma once
 #include "UndirectedGraph.h"
+#include <set>
+#include <tuple>
+
+std::vector<std::string> split(std::string value, const std::string delimiter);
 
 template <typename T>
 class UndirectedUnlabeledGraph : public UndirectedGraph<T>
@@ -18,18 +22,30 @@ class UndirectedUnlabeledGraph : public UndirectedGraph<T>
 
     friend ifstream& operator>>(ifstream& is, UndirectedUnlabeledGraph<T>& graph)
     {
-      is >> graph.graph_size;
+      std::set<std::pair<long, long>> edges;
+      long max_id = -1;
 
-      graph.matrix = SymMatrix<T>(graph.graph_size);
-      for (long row = 0; row < graph.graph_size; row++)
+      std::string line;
+      while (std::getline(is, line))
       {
-        for (long col = 0; col < graph.graph_size; col++)
-        {
-          T value(0);
-          is >> value;
-          graph.matrix(row, col, value);
-        }
+        auto ids = split(line, ",");
+        auto a = atoi(ids.at(0).c_str());
+        auto b = atoi(ids.at(1).c_str());
+        auto w = atoi(ids.at(2).c_str());
+
+        if (w > 0)
+          edges.insert(std::make_pair(a, b));
+        if (a > max_id)
+          max_id = a;
+        if (b > max_id)
+          max_id = b;
       }
+
+      graph.graph_size = max_id + 1;
+      graph.matrix = SymMatrix<T>(graph.graph_size);
+
+      for (const auto& itr : edges)
+        graph.matrix(itr.first, itr.second, 1);
 
       return is;
     }
