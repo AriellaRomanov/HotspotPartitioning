@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
   long partition_count = GetParameter("PartitionCount", parameters, 1);
   bool use_threading = GetParameter("UseThreading", parameters, 0) != 0;
   bool fill_pool = GetParameter("FillPartitionFromStructure", parameters, 0) != 0;
+  std::string graph_delimeter = GetParameter("GraphDelimeter", parameters, " ");
 
   if (graph_file == "")
   {
@@ -71,7 +72,8 @@ int main(int argc, char *argv[])
   }
 
   // create the graph
-  UndirectedUnlabeledGraph<mType> graph(1);
+  std::cout << "Reading graph file" << std::endl;
+  UndirectedUnlabeledGraph<mType> graph(1, graph_delimeter);
   try
   {
     file >> graph;
@@ -85,9 +87,11 @@ int main(int argc, char *argv[])
 
   auto graph_size = graph.GetSize();
 
+  std::cout << "Reading structure file" << std::endl;
   std::vector<Partition> structures;
   ReadStructures(structure_file, structures);  
   
+  std::cout << "Selecting hotspots" << std::endl;
   Partition hotspots;
   SelectHotSpots(structures, hotspots, partition_count, graph);
 
@@ -120,6 +124,7 @@ int main(int argc, char *argv[])
       claimed_nodes.insert(node);
   }
 
+  std::cout << "Partitioning..." << std::endl;
   // ignore the threading parameter for now
   //if (use_threading || !use_threading)
   //{
